@@ -55,9 +55,15 @@ impl A {
         x: int = 2,
     ))]
     fn new(x: usize) -> Self {
-        Self { x, s: "abc".to_string() }
+        Self {
+            x,
+            s: "abc".to_string(),
+        }
     }
-
+    #[gen_stub(skip)] // will ignore/skip `fn need_skip`
+    fn need_skip(&self, x: usize) -> usize {
+        x
+    }
     fn show_x(&self) {
         println!("x = {}", self.x);
     }
@@ -82,7 +88,10 @@ impl FromPyObject<'_> for MyInt {
     x: int = 2,
 ))]
 fn create_a(x: MyInt) -> A {
-    A { x: x.0, s: "abc".to_string() }
+    A {
+        x: x.0,
+        s: "abc".to_string(),
+    }
 }
 
 create_exception!(pure, MyError, PyRuntimeError);

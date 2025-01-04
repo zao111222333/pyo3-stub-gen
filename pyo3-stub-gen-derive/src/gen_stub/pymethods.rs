@@ -1,8 +1,8 @@
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, ToTokens, TokenStreamExt};
-use syn::{Error, ImplItem, ItemImpl, Result, Type};
+use syn::{Error, ImplItem, ImplItemFn, ItemImpl, Result, Type};
 
-use super::{quote_option, MemberInfo, MethodInfo, NewInfo};
+use super::{parse_pyo3_attrs, quote_option, Attr, MemberInfo, MethodInfo, NewInfo};
 
 pub struct PyMethodsInfo {
     struct_id: Type,
@@ -19,6 +19,11 @@ pub(crate) fn prune_attrs(item: &mut ItemImpl) {
     }
 }
 
+fn need_skip(item: &ImplItemFn) -> Result<bool> {
+    let attrs = parse_pyo3_attrs(&item.attrs)?;
+    Ok(attrs.iter().any(|attr| matches!(attr, Attr::Skip)))
+}
+
 impl TryFrom<ItemImpl> for PyMethodsInfo {
     type Error = Error;
     fn try_from(item: ItemImpl) -> Result<Self> {
@@ -29,6 +34,9 @@ impl TryFrom<ItemImpl> for PyMethodsInfo {
 
         for inner in item.items {
             if let ImplItem::Fn(item_fn) = inner {
+                if need_skip(&item_fn)? {
+                    continue;
+                }
                 if NewInfo::is_candidate(&item_fn)? {
                     new = Some(NewInfo::try_from(item_fn)?);
                 } else if MemberInfo::is_candidate_item(&item_fn)? {

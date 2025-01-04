@@ -52,10 +52,8 @@ pub enum Attr {
     Name(String),
     Get,
     GetAll,
-    Default(String),
     Module(String),
     Signature(Signature),
-    SpecifiedSignature(String),
 
     // Attributes appears in components within `#[pymethods]`
     // <https://docs.rs/pyo3/latest/pyo3/attr.pymethods.html>
@@ -63,6 +61,11 @@ pub enum Attr {
     Getter(Option<String>),
     StaticMethod,
     ClassMethod,
+
+    // `#[gen_stub(k = v, k = v)]` attributes
+    Default(String),
+    SpecifiedSignature(String),
+    Skip,
 }
 
 pub fn parse_pyo3_attrs(attrs: &[Attribute]) -> Result<Vec<Attr>> {
@@ -166,6 +169,11 @@ pub fn parse_gen_stub_attr(attr: &Attribute) -> Result<Vec<Attr>> {
                 }
             }) {
                 match tt {
+                    [Ident(ident)] => {
+                        if ident == "skip" {
+                            gen_stub_attrs.push(Attr::Skip);
+                        }
+                    }
                     [Ident(ident), Punct(_), Group(group)] => {
                         if ident == "signature" {
                             gen_stub_attrs.push(Attr::SpecifiedSignature(
