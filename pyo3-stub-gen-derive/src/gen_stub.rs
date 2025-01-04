@@ -90,10 +90,12 @@ use quote::quote;
 use syn::{parse2, ItemEnum, ItemFn, ItemImpl, ItemStruct, Result};
 
 pub fn pyclass(item: TokenStream2) -> Result<TokenStream2> {
-    let inner = PyClassInfo::try_from(parse2::<ItemStruct>(item.clone())?)?;
+    let mut item_struct = parse2::<ItemStruct>(item)?;
+    let inner = PyClassInfo::try_from(item_struct.clone())?;
     let derive_stub_type = StubType::from(&inner);
+    pyclass::prune_attrs(&mut item_struct);
     Ok(quote! {
-        #item
+        #item_struct
         #derive_stub_type
         pyo3_stub_gen::inventory::submit! {
             #inner

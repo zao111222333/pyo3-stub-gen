@@ -59,6 +59,7 @@ pub struct MethodInfo {
 pub struct MemberInfo {
     pub name: &'static str,
     pub r#type: fn() -> TypeInfo,
+    pub default: Option<&'static str>,
     pub doc: &'static str,
 }
 

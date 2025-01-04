@@ -39,6 +39,9 @@ fn create_dict(n: usize) -> HashMap<usize, Vec<usize>> {
 struct A {
     #[pyo3(get, set)]
     x: usize,
+    #[pyo3(get, set)]
+    #[gen_stub(default = "\"abc\"")]
+    s: String,
 }
 
 #[gen_stub_pymethods]
@@ -52,7 +55,7 @@ impl A {
         x: int = 2,
     ))]
     fn new(x: usize) -> Self {
-        Self { x }
+        Self { x, s: "abc".to_string() }
     }
 
     fn show_x(&self) {
@@ -79,7 +82,7 @@ impl FromPyObject<'_> for MyInt {
     x: int = 2,
 ))]
 fn create_a(x: MyInt) -> A {
-    A { x: x.0 }
+    A { x: x.0, s: "abc".to_string() }
 }
 
 create_exception!(pure, MyError, PyRuntimeError);

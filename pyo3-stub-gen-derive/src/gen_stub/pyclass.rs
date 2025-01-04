@@ -91,6 +91,13 @@ impl ToTokens for PyClassInfo {
     }
 }
 
+pub(crate) fn prune_attrs(item: &mut ItemStruct) {
+    super::attr::prune_attrs(&mut item.attrs);
+    for field in item.fields.iter_mut() {
+        super::attr::prune_attrs(&mut field.attrs);
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;

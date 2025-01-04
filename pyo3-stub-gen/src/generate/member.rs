@@ -6,6 +6,7 @@ use std::{collections::HashSet, fmt};
 pub struct MemberDef {
     pub name: &'static str,
     pub r#type: TypeInfo,
+    pub default: Option<&'static str>,
     pub doc: &'static str,
 }
 
@@ -20,6 +21,7 @@ impl From<&MemberInfo> for MemberDef {
         Self {
             name: info.name,
             r#type: (info.r#type)(),
+            default: info.default,
             doc: info.doc,
         }
     }
@@ -28,7 +30,11 @@ impl From<&MemberInfo> for MemberDef {
 impl fmt::Display for MemberDef {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let indent = indent();
-        writeln!(f, "{indent}{}: {}", self.name, self.r#type)?;
+        if let Some(default) = self.default {
+            writeln!(f, "{indent}{}: {} = {default}", self.name, self.r#type)?;
+        } else {
+            writeln!(f, "{indent}{}: {}", self.name, self.r#type)?;
+        }
         if !self.doc.is_empty() {
             writeln!(f, r#"{indent}r""""#)?;
             for line in self.doc.lines() {

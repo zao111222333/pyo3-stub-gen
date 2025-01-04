@@ -120,14 +120,5 @@ impl ToTokens for PyFunctionInfo {
 }
 
 pub(crate) fn prune_attrs(item_fn: &mut ItemFn) {
-    item_fn.attrs = std::mem::take(&mut item_fn.attrs)
-        .into_iter()
-        .filter_map(|attr| {
-            if attr.path().is_ident("gen_stub") {
-                None
-            } else {
-                Some(attr)
-            }
-        })
-        .collect();
+    super::attr::prune_attrs(&mut item_fn.attrs);
 }

@@ -52,6 +52,7 @@ pub enum Attr {
     Name(String),
     Get,
     GetAll,
+    Default(String),
     Module(String),
     Signature(Signature),
     SpecifiedSignature(String),
@@ -164,7 +165,6 @@ pub fn parse_gen_stub_attr(attr: &Attribute) -> Result<Vec<Attr>> {
                     false
                 }
             }) {
-                #[expect(clippy::single_match)] // use match for future's extension
                 match tt {
                     [Ident(ident), Punct(_), Group(group)] => {
                         if ident == "signature" {
@@ -176,6 +176,25 @@ pub fn parse_gen_stub_attr(attr: &Attribute) -> Result<Vec<Attr>> {
                                     .trim_end_matches(')')
                                     .trim_end_matches(',')
                                     .to_string(),
+                            ));
+                        }
+                    }
+                    [Ident(ident), Punct(_), Literal(lit)] => {
+                        if ident == "default" {
+                            gen_stub_attrs
+                                .push(Attr::Default(
+                                    lit
+                                        .to_string()
+                                        .trim()
+                                        .strip_prefix("\"")
+                                        .and_then(|s|s.strip_suffix("\""))
+                                        .map(|s|s.replace("\\\"", "\""))
+                                        .ok_or(
+                                        syn::Error::new(
+                                            proc_macro2::Span::call_site(),
+                                            "want quotes, e.g. `#[gen_stub(defualt = \"xxx\")]`. For str's defualt, use `#[gen_stub(defualt = \"\\\"abc\\\"\")]`",
+                                          )
+                                    )?.to_string()
                             ));
                         }
                     }
@@ -267,6 +286,19 @@ pub(crate) fn check_specified_signature(
         }
     }
     Ok(())
+}
+
+pub(crate) fn prune_attrs(attrs: &mut Vec<Attribute>) {
+    *attrs = std::mem::take(attrs)
+        .into_iter()
+        .filter_map(|attr| {
+            if attr.path().is_ident("gen_stub") {
+                None
+            } else {
+                Some(attr)
+            }
+        })
+        .collect();
 }
 
 #[cfg(test)]
