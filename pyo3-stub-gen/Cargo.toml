@@ -12,6 +12,7 @@ readme.workspace = true
 anyhow.workspace = true
 chrono.workspace = true
 inventory.workspace = true
+indexmap = { workspace = true, optional = true }
 itertools.workspace = true
 log.workspace = true
 maplit.workspace = true
