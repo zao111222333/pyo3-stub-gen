@@ -39,7 +39,7 @@ impl StubInfo {
             }
 
             let mut f = fs::File::create(&dest)?;
-            write!(f, "{}", module)?;
+            write!(f, "{}", module.formatter())?;
             log::info!(
                 "Generate stub file of a module `{name}` at {dest}",
                 dest = dest.display()
