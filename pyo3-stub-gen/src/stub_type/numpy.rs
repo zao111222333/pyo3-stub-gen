@@ -1,6 +1,6 @@
 use super::{PyStubType, TypeInfo};
 use maplit::hashset;
-use numpy::{PyArray, PyUntypedArray};
+use numpy::{ndarray::Dimension, Element, PyArray, PyReadonlyArray, PyUntypedArray};
 
 trait NumPyScalar {
     fn type_() -> TypeInfo;
@@ -49,5 +49,11 @@ impl PyStubType for PyUntypedArray {
             name: "numpy.typing.NDArray[typing.Any]".into(),
             import: hashset!["numpy.typing".into(), "typing".into()],
         }
+    }
+}
+
+impl<T: NumPyScalar + Element, D: Dimension> PyStubType for PyReadonlyArray<'_, T, D> {
+    fn type_output() -> TypeInfo {
+        PyArray::<T, D>::type_output()
     }
 }

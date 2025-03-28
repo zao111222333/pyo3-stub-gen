@@ -2,10 +2,7 @@
 
 use crate::stub_type::*;
 use std::{
-    borrow::Cow,
-    ffi::{OsStr, OsString},
-    path::PathBuf,
-    time::SystemTime,
+    borrow::Cow, ffi::{OsStr, OsString}, path::PathBuf, rc::Rc, sync::Arc, time::SystemTime
 };
 
 use chrono::{DateTime, FixedOffset, NaiveDate, NaiveDateTime, NaiveTime, TimeZone, Utc};
@@ -86,3 +83,30 @@ impl_with_module!(FixedOffset, "datetime.tzinfo", "datetime");
 impl_with_module!(Utc, "datetime.tzinfo", "datetime");
 impl_with_module!(std::time::Duration, "datetime.timedelta", "datetime");
 impl_with_module!(chrono::Duration, "datetime.timedelta", "datetime");
+
+impl<T: PyStubType> PyStubType for &T {
+    fn type_input() -> TypeInfo {
+        T::type_input()
+    }
+    fn type_output() -> TypeInfo {
+        T::type_output()
+    }
+}
+
+impl<T: PyStubType> PyStubType for Rc<T> {
+    fn type_input() -> TypeInfo {
+        T::type_input()
+    }
+    fn type_output() -> TypeInfo {
+        T::type_output()
+    }
+}
+
+impl<T: PyStubType> PyStubType for Arc<T> {
+    fn type_input() -> TypeInfo {
+        T::type_input()
+    }
+    fn type_output() -> TypeInfo {
+        T::type_output()
+    }
+}

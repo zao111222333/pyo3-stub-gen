@@ -64,6 +64,12 @@ impl A {
         x
     }
 
+    #[getter]
+    #[gen_stub(default = None)]
+    fn get_xx(&self) -> PyResult<Option<usize>> {
+        Ok(Some(self.x))
+    }
+
     #[gen_stub(skip)]
     fn need_skip(&self) {}
 }
